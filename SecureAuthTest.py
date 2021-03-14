@@ -7,10 +7,9 @@ Students are not expected to modify main() function.
 '''
 
 import os
+import hashlib, uuid
 
 def secure_hashed_passwd(username, password):
-    import hashlib, uuid
-
     '''
     @TODO: Students are required to implement this function.
     using salt+paper+sha3-224 algorithm
@@ -71,10 +70,30 @@ def verify_hashed_passwd(username, passwd):
     :return:
     '''
     #databse file with username and hashed-password.
-    infile="hlogins.dat"
+
+    infile = "hlogins.dat"
+
     #open the file to read
-    fd=open(infile,"r")
+    fd = open(infile, "r")
+
     #read the infile line by line to retrive a matching row with first field value of username
+    for line in fd:
+        values = line.split(",")
+        if username == values[0]:
+            salt = values[1]
+            pepper = values[2]
+            stored_hpasswd = values[3]
+            tempo_hash = hashlib.sha224(passwd + salt + pepper).hexdigest()
+            if tempo_hash == stored_hpasswd:
+                print("Authentication Successful!")
+                return True
+            else:
+                print("Authentication Unsuccessful!")
+                return False
+        else:
+            print("Authentication Unsuccessful!")
+            return False
+
 
     #To read the file line by line, use a for loop.
     #Hint: split each line by a comma "," to get list of username, salt, pepper, and stored_hashpassword values.
