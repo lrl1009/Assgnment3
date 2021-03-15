@@ -8,59 +8,45 @@ Students are not expected to modify main() function.
 
 import os
 
+username = "superuser@yahoo.com"
+password = "Ranaway123!"
+
 def secure_hashed_passwd(username, password):
     import hashlib, uuid
 
     '''
     @TODO: Students are required to implement this function.
-    using salt+paper+sha3-224 algorithm
+    using salt+pepper+sha3-224 algorithm
     :param username: string repr of username
     :param passwd: a plain text password
     :return: True if given values are stored successfully in outfile var; else returns False
     '''
 
     #use salt and pepper to hash 'hpasswd' using sha-3-224 algorithm
-    HF = hashlib.sha224()
-    HF.update(password)
-    digest = HF.digest()
-    print("SHA224 bytes=", digest)  # bytes
-    print("SHA224:", digest.hex())  # in hexadevimal rep
-
+    hpasswd = hashlib.sha224()
+    hpasswd.update(password)
+    digest = hpasswd.digest()
 
     # Add salt
-    salt = uuid.uuid4().bytes  # or .hex
-    HF = hashlib.sha224()
-    HF.update(password)
-    HF.update(salt)  # or HF.update(bytes(salt,'utf-8'))
-    salteddigest = HF.digest()
-    print("byte salt, digest-SHA224 \n", salt, ",", salteddigest)
-    print("hex salt, digest-SHA224 \n", salt.hex(), ",", salteddigest.hex())
+    salt = uuid.uuid4().bytes
+    hpasswd.update(password)
+    hpasswd.update(salt)
+    salteddigest = hpasswd.digest()
+
+    # add pepper
+    pepper = os.urandom(16)
+    hpasswd.update(pepper)
+    saltpepperdigest = hpasswd.digest()
 
     # Salt + Pepper + Run(Iteration)
-    pepper = os.urandom(16)  # generate 3 bytes of random number.
-    HF.update(pepper)
-    saltpepperdigest = HF.digest()
-    print("byte salt+paper, digest-SHA224 \n", salt, ",", pepper, ",", saltpepperdigest)
-    print("byte salt+paper, digest-SHA224 \n", salt.hex(), ",", pepper.hex(), ",", saltpepperdigest.hex())
+    saltpepperdigest = hpasswd.digest()
 
-    N = pow(2, 10)
+    N = pow(2, 10)                                 #pow(2, 10) = 2 to the 10 power
     for i in range(0, N):
         saltpepperdigest = hashlib.sha224(saltpepperdigest).digest()
 
-    print("\n\n")
-    print("byte salt,pepper,N,digest-SHA224")
-    print(salt, ",", pepper, ",", N, ",", saltpepperdigest)
-
-    # add pepper
-    pepper = os.urandom(16)  # generate 3 bytes of random number.
-    HF.update(pepper)
-    saltpepperdigest = HF.digest()
-    print("byte salt+paper, digest-SHA224 \n", salt, ",", pepper, ",", saltpepperdigest)
-    print("byte salt+paper, digest-SHA224 \n", salt.hex(), ",", pepper.hex(), ",", saltpepperdigest.hex())
-
-    # return salt,pepper,saltpepperdigest
-
-
+    # return hex version salt,pepper,saltpepperdigest
+    return salt.hex(), pepper.hex(), saltpepperdigest.hex()
 def verify_hashed_passwd(username, passwd):
     '''
     @TODO: Students are required to implement this function.
