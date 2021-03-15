@@ -2,7 +2,6 @@
 Author: Naresh Adhikari, Sru
 This is a skeletal program that students need to implement the declared
 and defined functions under @TODO annotation, according to the logic/functional requirements stated in assigment-2.pdf.
-
 Students are not expected to modify main() function.
 '''
 
@@ -20,8 +19,8 @@ def secure_hashed_passwd(username, password):
     :param passwd: a plain text password
     :return: True if given values are stored successfully in outfile var; else returns False
     '''
-
     #use salt and pepper to hash 'hpasswd' using sha-3-224 algorithm
+    password = bytes(password, "utf-8")
     hpasswd = hashlib.sha224()
     hpasswd.update(password)
     digest = hpasswd.digest()
@@ -49,7 +48,6 @@ def secure_hashed_passwd(username, password):
 def verify_hashed_passwd(username, passwd):
     '''
     @TODO: Students are required to implement this function.
-
     Server side verifies login credentials username and password
     :param username:
     :param hpasswd:
@@ -69,15 +67,24 @@ def verify_hashed_passwd(username, passwd):
             salt = values[1]
             pepper = values[2]
             stored_hpasswd = values[3]
+            passwd = bytes(passwd, "utf-8")
+            salt = bytes(salt, "utf-8")
+            pepper = bytes(pepper, "utf-8")
             tempo_hash = hashlib.sha224(passwd + salt + pepper).hexdigest()
             if tempo_hash == stored_hpasswd:
                 print("Authentication Successful!")
+                print(stored_hpasswd)
+
                 return True
             else:
                 print("Authentication Unsuccessful!")
+                print("Incorrect Password")
+                print(stored_hpasswd)
+
                 return False
         else:
             print("Authentication Unsuccessful!")
+            print(username)
             return False
 
 
