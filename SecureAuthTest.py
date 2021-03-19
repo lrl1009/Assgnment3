@@ -8,8 +8,6 @@ Students are not expected to modify main() function.
 import os
 import hashlib, uuid
 
-username = "superuser@yahoo.com"
-password = "Ranaway123!"
 
 def secure_hashed_passwd(username, password):
     '''
@@ -23,28 +21,29 @@ def secure_hashed_passwd(username, password):
     password = bytes(password, "utf-8")
     hpasswd = hashlib.sha224()
     hpasswd.update(password)
-    digest = hpasswd.digest()
+ #   digest = hpasswd.digest()
 
     # Add salt
     salt = uuid.uuid4().bytes
-    hpasswd.update(password)
+#    hpasswd.update(password)
     hpasswd.update(salt)
-    salteddigest = hpasswd.digest()
+#    salteddigest = hpasswd.digest()
 
     # add pepper
     pepper = os.urandom(16)
     hpasswd.update(pepper)
-    saltpepperdigest = hpasswd.digest()
+    saltpepperdigest = hpasswd.hexdigest()
 
     # Salt + Pepper + Run(Iteration)
-    saltpepperdigest = hpasswd.digest()
+#    saltpepperdigest = hpasswd.digest()
 
-    N = pow(2, 10)                                 #pow(2, 10) = 2 to the 10 power
-    for i in range(0, N):
-        saltpepperdigest = hashlib.sha224(saltpepperdigest).digest()
+#    N = pow(2, 10)                                 #pow(2, 10) = 2 to the 10 power
+#    for i in range(0, N):
+#        saltpepperdigest = hashlib.sha224(saltpepperdigest).digest()
 
     # return hex version salt,pepper,saltpepperdigest
-    return salt.hex(), pepper.hex(), saltpepperdigest.hex()
+    return salt.hex(), pepper.hex(), saltpepperdigest #s.hex()
+
 def verify_hashed_passwd(username, passwd):
     '''
     @TODO: Students are required to implement this function.
@@ -64,29 +63,28 @@ def verify_hashed_passwd(username, passwd):
     for line in fd:
         values = line.split(",")
         if username == values[0]:
+            print("\tusername-found")
             salt = values[1]
             pepper = values[2]
             stored_hpasswd = values[3]
+            print("\tstored-hash", stored_hpasswd)
+            print("\t salt,pep",salt,"..",pepper)
             passwd = bytes(passwd, "utf-8")
             salt = bytes(salt, "utf-8")
             pepper = bytes(pepper, "utf-8")
-            tempo_hash = hashlib.sha224(passwd + salt + pepper).hexdigest()
-            if tempo_hash == stored_hpasswd:
-                print("Authentication Successful!")
-                print(stored_hpasswd)
-
+            tempo_hash = hashlib.sha224()
+            tempo_hash.update(passwd)
+            tempo_hash.update(salt)
+            tempo_hash.update(pepper)
+            temp_hash2=tempo_hash.hexdigest()
+            print("\tgen-hash", temp_hash2)
+            if temp_hash2 == stored_hpasswd:
+                #print("Authentication Successful!")
+                #print(stored_hpasswd)
                 return True
-            else:
-                print("Authentication Unsuccessful!")
-                print("Incorrect Password")
-                print(stored_hpasswd)
-
-                return False
-        else:
-            print("Authentication Unsuccessful!")
-            print(username)
-            return False
-
+    #print("Authentication Unsuccessful!")
+    #print(username)
+    return False
 
     #To read the file line by line, use a for loop.
     #Hint: split each line by a comma "," to get list of username, salt, pepper, and stored_hashpassword values.
@@ -124,7 +122,7 @@ def main():
         passwd=lpasswd[i]
         salt,pepper,saltpepperdigest=secure_hashed_passwd(username,passwd)
         if i in [3,7,1]:continue
-        fd.write(username + "," + str(salt) + "," + str(pepper) + "," + saltpepperdigest+","+"$\n")
+        fd.write(username + "," + salt + "," + pepper + "," + saltpepperdigest+","+"$\n")
     fd.close()
 
     for j in range(0,len(lusername)):
@@ -134,7 +132,7 @@ def main():
         if not result:
             print("<!> Login failed for user ",uname)
         else:
-            print("Login succesful for user ",uname)
+            print("Login successful for user ",uname)
 
 if __name__ == "__main__":
     main()
