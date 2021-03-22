@@ -7,8 +7,6 @@ Students are not expected to modify main() function.
 
 import os
 import hashlib, uuid
-
-
 def secure_hashed_passwd(username, password):
     '''
     @TODO: Students are required to implement this function.
@@ -21,28 +19,27 @@ def secure_hashed_passwd(username, password):
     password = bytes(password, "utf-8")
     hpasswd = hashlib.sha224()
     hpasswd.update(password)
- #   digest = hpasswd.digest()
 
     # Add salt
     salt = uuid.uuid4().bytes
-#    hpasswd.update(password)
-    hpasswd.update(salt)
-#    salteddigest = hpasswd.digest()
+    hsalt= salt.hex()
+    hsalt = bytes(hsalt, "utf-8")
+    hpasswd.update(hsalt)
 
     # add pepper
     pepper = os.urandom(16)
-    hpasswd.update(pepper)
+    hpepper = pepper.hex()
+    hpepper = bytes(hpepper, "utf-8")
+    hpasswd.update(hpepper)
+
     saltpepperdigest = hpasswd.hexdigest()
 
-    # Salt + Pepper + Run(Iteration)
-#    saltpepperdigest = hpasswd.digest()
-
-#    N = pow(2, 10)                                 #pow(2, 10) = 2 to the 10 power
-#    for i in range(0, N):
-#        saltpepperdigest = hashlib.sha224(saltpepperdigest).digest()
+#    print("Created saltpepper digest", hpasswd.hexdigest())
+#    print("Salted", salt.hex(), "Pepper", pepper.hex(), "Saltpepper", saltpepperdigest)
 
     # return hex version salt,pepper,saltpepperdigest
-    return salt.hex(), pepper.hex(), saltpepperdigest #s.hex()
+    return salt.hex(), pepper.hex(), saltpepperdigest
+#    return salt.hex(), pepper.hex(), saltpepperdigest
 
 def verify_hashed_passwd(username, passwd):
     '''
@@ -52,14 +49,13 @@ def verify_hashed_passwd(username, passwd):
     :param hpasswd:
     :return:
     '''
-    #databse file with username and hashed-password.
-
+    #database file with username and hashed-password.
     infile = "hlogins.dat"
 
     #open the file to read
     fd = open(infile, "r")
 
-    #read the infile line by line to retrive a matching row with first field value of username
+    #read the infile line by line to retrieve a matching row with first field value of username
     for line in fd:
         values = line.split(",")
         if username == values[0]:
@@ -69,21 +65,17 @@ def verify_hashed_passwd(username, passwd):
             stored_hpasswd = values[3]
             print("\tstored-hash", stored_hpasswd)
             print("\t salt,pep",salt,"..",pepper)
-            passwd = bytes(passwd, "utf-8")
+            hpasswd = bytes(passwd, "utf-8")
             salt = bytes(salt, "utf-8")
             pepper = bytes(pepper, "utf-8")
             tempo_hash = hashlib.sha224()
-            tempo_hash.update(passwd)
+            tempo_hash.update(hpasswd)
             tempo_hash.update(salt)
             tempo_hash.update(pepper)
             temp_hash2=tempo_hash.hexdigest()
             print("\tgen-hash", temp_hash2)
             if temp_hash2 == stored_hpasswd:
-                #print("Authentication Successful!")
-                #print(stored_hpasswd)
                 return True
-    #print("Authentication Unsuccessful!")
-    #print(username)
     return False
 
     #To read the file line by line, use a for loop.
@@ -120,7 +112,7 @@ def main():
     for i in range(0,len(lusername)):
         username=lusername[i]
         passwd=lpasswd[i]
-        salt,pepper,saltpepperdigest=secure_hashed_passwd(username,passwd)
+        salt,pepper,saltpepperdigest=secure_hashed_passwd(username, passwd)
         if i in [3,7,1]:continue
         fd.write(username + "," + salt + "," + pepper + "," + saltpepperdigest+","+"$\n")
     fd.close()
@@ -128,11 +120,11 @@ def main():
     for j in range(0,len(lusername)):
         uname=lusername[j]
         passwd=lpasswd[j]
-        result=verify_hashed_passwd(uname,passwd)
+        result=verify_hashed_passwd(uname, passwd)
         if not result:
-            print("<!> Login failed for user ",uname)
+            print("<!> Login failed for user ", uname)
         else:
-            print("Login successful for user ",uname)
+            print("Login successful for user ", uname)
 
 if __name__ == "__main__":
     main()
